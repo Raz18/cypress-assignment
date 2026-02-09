@@ -56,7 +56,7 @@ describe('Vulcan Cyber Playground - Test Suite', () => {
       cy.vulcanLogin(credentials.username, credentials.password)
     })
 
-    it.only('should create a playbook with CVE-2022-25235 filter and email remediation', () => {
+    it('should create a playbook with CVE-2022-25235 filter and email remediation', () => {
       // STEP 1: Navigate to Automations
  
       cy.navigateTo('Automations')
