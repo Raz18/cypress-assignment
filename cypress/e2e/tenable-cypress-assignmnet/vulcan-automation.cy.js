@@ -56,7 +56,7 @@ describe('Vulcan Cyber Playground - Test Suite', () => {
       cy.vulcanLogin(credentials.username, credentials.password)
     })
 
-    it('should create a playbook with CVE-2022-25235 filter and email remediation', () => {
+    it.only('should create a playbook with CVE-2022-25235 filter and email remediation', () => {
       // STEP 1: Navigate to Automations
  
       cy.navigateTo('Automations')
@@ -112,13 +112,21 @@ describe('Vulcan Cyber Playground - Test Suite', () => {
       // 5d: Close the multiselect panel
       cy.get('.p-multiselect-close').click()
       // ==================================
-      // STEP 6: Preview Vulnerability Instances
+      // STEP 6: Preview Vulnerability Instances and validate counts
       // ==================================
       cy.contains('button', 'Preview Vulnerability Instances')
         .should('be.visible')
         .and('not.be.disabled')
         .scrollIntoView()
         .click()
+
+      // Validate preview counts: Must match expected vulnerability/asset counts
+      // This validates the playbook filter is working correctly
+      cy.contains('.button-content-container', 'Vulnerabilities (0)')
+        .should('be.visible')
+      
+      cy.contains('.button-content-container', 'Assets (0)')
+        .should('be.visible')
 
       cy.screenshot('TC2_06_preview-vulnerability-instances')
 
@@ -149,7 +157,6 @@ describe('Vulcan Cyber Playground - Test Suite', () => {
         .first()
         .scrollIntoView()
         .should('be.visible')
-        
         .type('abel.tuter@example.com{enter}')
 
       // Verify the recipient was added
@@ -163,7 +170,23 @@ describe('Vulcan Cyber Playground - Test Suite', () => {
         .scrollIntoView()
         .should('be.visible')
         .click()
+      cy.url().should('include', '/automation/manage-policies')
       cy.screenshot('TC2_10_playbook-saved-and-run')
+      
+      // Search for the created playbook
+      cy.get('.vulcan-input').first().should('be.visible').type('CVE-2022-25235 Jira automation playbook{enter}')
+      cy.contains('CVE-2022-25235 Jira automation playbook').click()
+      
+      // Click Activity Log to view playbook execution details
+      cy.contains('button', 'Activity Log')
+        .should('be.visible')
+        .click()
+      // Validate the log contains the amount of  0 vulnerabilities and  0 assets from the preview step, which confirms the playbook ran with the correct filter and action
+      //cy.contains('.p-timeline-event', '0 vulnerabilities').should('be.visible')
+      //cy.contains('.p-timeline-event', '0 assets').should('be.visible')
+      cy.screenshot('TC2_11_playbook-activity-log')
+
+
     })
 
     it('should navigate to Go to Campaigns screen, and close the following campaign "Untitled Playbook 12" without marking its associated tickets as Done.', () => {

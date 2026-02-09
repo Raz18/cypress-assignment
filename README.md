@@ -9,12 +9,25 @@ Verifies user can successfully login with valid credentials.
 
 ### TC2: Create & Validate Automation
 Creates an automation playbook that sends an email for each asset affected by CVE-2022-25235:
-- Navigates to Automations
-- Creates a new playbook
-- Filters by Vulnerability → CVE → CVE-2022-25235
-- Configures "Assign via email" remediation action
-- Sets recipient as test user `abel.tuter@example.com`
-- Saves and runs the playbook
+
+**Test Steps:**
+1. Navigate to Automations page
+2. Click "New Playbook"
+3. Set playbook name: `"CVE-2022-25235 Jira automation playbook"`
+4. Configure filter: Vulnerability → CVE → CVE-2022-25235
+5. Click "Preview Vulnerability Instances"
+6. **Validate counts**: Verify "Vulnerabilities (0)" and "Assets (0)" appear
+7. Select "Assign via email" remediation action
+8. Add recipient: `abel.tuter@example.com`
+9. Click "Save & Run"
+10. Search for the created playbook in the Automations list
+11. Open the playbook and click "Activity Log" to view execution details
+
+**Important Notes:**
+- The test validates that exactly **0 vulnerabilities** and **0 assets** match the CVE-2022-25235 filter in the current environment
+- This validation ensures the playbook filter is working correctly
+- ⏱️ **Execution logs are not displayed instantly** - After the playbook runs, you may need to wait 2-5 minutes for the Activity Log to populate with execution details
+- The Activity Log will show the actual number of actions taken, which should match the preview counts
 
 ### TC3: Close Campaign
 Navigates to Campaigns and closes a specific campaign without marking associated tickets as done.
@@ -62,18 +75,6 @@ npx cypress run --spec "cypress/e2e/tenable-cypress-assignmnet/vulcan-automation
 - Chrome web security: Disabled (for testing purposes)
 - Auto file watch: Disabled to prevent auto-rerun on file changes
 
-## ⚠️ Important Notes
-
-### Campaign Test Configuration
-**The campaign test (TC3) requires manual configuration before running:**
-
-The test searches for a campaign named `"Untitled Playbook 12"` (line 179). **You must update this campaign name** to match an actual campaign that exists in your Vulcan Cyber Playground environment.
-
-To update:
-1. Open `cypress/e2e/tenable-cypress-assignmnet/vulcan-automation.cy.js`
-2. Find line 179: `.type('Untitled Playbook 12{enter}')`
-3. Replace `"Untitled Playbook 12"` with your actual campaign name
-4. Also update line 182 where the campaign name is referenced in the assertion
 
 Example:
 ```javascript
@@ -131,7 +132,17 @@ Screenshots are automatically captured at key points during test execution and s
 ### Test Fails on Campaign Search
 - Verify the campaign name exists in your environment
 - Update the campaign name in the test file (see Important Notes above)
+### Preview Validation Fails (Vulnerabilities/Assets Count Mismatch)
+- If the counts don't match "Vulnerabilities (0)" and "Assets (0)":
+  - The CVE-2022-25235 data may differ in your environment
+  - Check the actual counts displayed after clicking "Preview Vulnerability Instances"
+  - Update the expected values in lines 127-130 of the test file to match your environment
 
+### Activity Log Shows No Data
+- The Activity Log takes **2-5 minutes** to populate after the playbook executes
+- This is expected behavior - the system processes the actions asynchronously
+- Wait a few minutes, then manually refresh or re-run the playbook query
+- The automated test may complete before logs appear - manual verification may be needed
 ### Popup Handling Issues
 - The `clearPopups()` command waits up to 10 seconds
 - If popups still interfere, you can manually add `cy.clearPopups()` after navigation steps
@@ -142,6 +153,11 @@ Screenshots are automatically captured at key points during test execution and s
 - Adjust these in `cypress.config.js` if needed
 
 ## 📝 Test Execution Notes
+
+- TC2 test validates that the CVE-2022-25235 filter correctly identifies **0 vulnerabilities** affecting **0 assets** (in the current environment state)
+- After running the playbook, the test searches for it and opens the Activity Log
+- **⏱️ Important**: Execution logs in the Activity Log are **not displayed instantly** - allow 2-5 minutes for the system to process and display the execution results
+- The Activity Log results should match the preview validation counts (0 vulnerabilities, 0 assets)
 - Tests use `scrollIntoView()` to ensure elements are visible before interaction
 - The playbook created in TC2 is named: `"CVE-2022-25235 Jira automation playbook"`
 
